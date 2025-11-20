@@ -56,10 +56,15 @@ class RuleBasedClassifier {
     }
 
     // Secondary action words (40% each)
+    // BUT: Don't count "want"/"need" if it's part of "want to interview" pattern
     final secondaryActions = ['post', 'posting', 'looking for', 'seeking', 'want', 'wanted', 'need', 'needed'];
     if (score < 0.45) { // Only check if no primary action found
       for (var action in secondaryActions) {
         if (text.contains(action)) {
+          // Skip if "want/need" appears with "interview" (it's interview intent, not job post)
+          if ((action == 'want' || action == 'need') && text.contains('interview')) {
+            continue;
+          }
           score += 0.40;
           break;
         }
@@ -153,6 +158,25 @@ class RuleBasedClassifier {
 
   double _calculateInterviewScore(String text) {
     double score = 0.0;
+
+    // Strong intent patterns - "want to interview", "need to interview", etc. (60%)
+    final strongInterviewPatterns = [
+      'want to interview',
+      'want interview',
+      'need to interview',
+      'need interview',
+      'going to interview',
+      'gonna interview',
+      'planning to interview',
+      'to interview a',
+      'to interview the',
+    ];
+    for (var pattern in strongInterviewPatterns) {
+      if (text.contains(pattern)) {
+        score += 0.60;
+        break;
+      }
+    }
 
     // "interview" keyword is strongest signal (35%)
     if (text.contains('interview') || text.contains('interviewing')) {
