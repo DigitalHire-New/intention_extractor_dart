@@ -21,6 +21,8 @@ A high-performance, hybrid intent classification system for hiring platforms bui
 - 400+ job titles (tech, healthcare, finance, retail, trades, etc.)
 - 200+ tech skills (languages, frameworks, tools, platforms)
 - 99.5%+ real-world case coverage
+- Intelligent query pattern detection (is there any, do we have, looking for, etc.)
+- Context-aware scoring to distinguish job posting from candidate search
 
 ✅ **Unified Field Extraction** (all intents)
 - **title**: Job position/title
@@ -228,16 +230,22 @@ print(result.fields);
 'We are hiring a devops engineer'  // JOB_POST
 'Recruiting full stack developer'   // JOB_POST
 'Onboarding a data scientist'       // JOB_POST
+'Software engineer in New York'     // JOB_POST (bare title + location)
 
 // Interview variations
 'Need to evaluate the candidate'    // INTERVIEW
 'Gonna interview applicants'        // INTERVIEW
 'Reschedule the zoom call'          // INTERVIEW
+'I want to interview a sales person' // INTERVIEW
 
 // Candidate search variations
 'Browse profiles in the ATS'        // CANDIDATE_SEARCH
 'Pull resumes from talent pool'     // CANDIDATE_SEARCH
 'Query database for engineers'      // CANDIDATE_SEARCH
+'Looking for associate engineer in New York'  // CANDIDATE_SEARCH
+'Any python developers in San Francisco'      // CANDIDATE_SEARCH
+'Is there any senior manager available'       // CANDIDATE_SEARCH
+'Do we have frontend developers'              // CANDIDATE_SEARCH
 ```
 
 ### Null Intent (Unrelated Messages)
@@ -340,10 +348,12 @@ dart run bin/user_intent_classifier.dart --interactive
 - Time/date: all days, months, times, relative times (asap, soon, etc.)
 
 ### CANDIDATE_SEARCH (450+ keywords)
-- Search actions: find, search, browse, view, explore, query, retrieve
+- Search actions: find, search, browse, view, explore, query, retrieve, looking for
+- Query patterns: is there any, are there any, do we have, do you have, any [title]
 - Candidate terms: candidate, applicant, profile, resume, CV, portfolio
 - Database terms: ATS, CRM, talent pool, candidate database, pipeline
 - Filter actions: filter, sort, view, browse, query
+- Availability queries: anyone available, got any, have we got any
 
 ### Job Titles (400+ titles)
 - **Tech**: developer, engineer, devops, SRE, QA, frontend, backend, fullstack
