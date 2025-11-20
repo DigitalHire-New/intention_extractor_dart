@@ -2,6 +2,7 @@
 enum Intent {
   jobPost,
   interview,
+  candidateSearch,
 }
 
 extension IntentExtension on Intent {
@@ -11,6 +12,8 @@ extension IntentExtension on Intent {
         return 'JOB_POST';
       case Intent.interview:
         return 'INTERVIEW';
+      case Intent.candidateSearch:
+        return 'CANDIDATE_SEARCH';
     }
   }
 }

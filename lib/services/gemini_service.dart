@@ -46,29 +46,29 @@ class GeminiService {
 
   String _buildPrompt(String message) {
     return '''You are an intent classifier for a hiring platform. Analyze the user's message and:
-1. Classify the intent as either "JOB_POST" (user wants to post a job/find candidates) or "INTERVIEW" (user wants to schedule/conduct an interview), or "NONE" if neither applies.
-2. Extract relevant fields based on the intent.
-
-For JOB_POST, extract:
-- JOB_TITLE: The job position title
-- LOCATION: Work location (city, remote, hybrid, etc.)
-- EXPERIENCE: Years of experience required
-- COMPENSATION: Salary or compensation range
-- SKILLS: List of required skills/technologies
-
-For INTERVIEW, extract:
-- CANDIDATE_NAME: Name of the candidate (if mentioned)
-- TIME: Scheduled time (if mentioned)
-- TYPE: Interview type (phone, video, in-person, etc.)
+1. Classify the intent as one of:
+   - "JOB_POST": User wants to post a job opening
+   - "INTERVIEW": User wants to schedule/conduct an interview
+   - "CANDIDATE_SEARCH": User wants to find/search for candidates or view profiles
+   - "NONE": If none of the above applies
+2. Extract relevant fields (same fields for all intents):
+   - title: Job title or position
+   - skills: List of required skills/technologies
+   - salary: Salary or compensation range
+   - location: Work location (city, state, country)
+   - workplace_type: remote, hybrid, or onsite
 
 User message: "$message"
 
 Respond ONLY with valid JSON in this exact format:
 {
-  "intent": "JOB_POST" | "INTERVIEW" | "NONE",
+  "intent": "JOB_POST" | "INTERVIEW" | "CANDIDATE_SEARCH" | "NONE",
   "fields": {
-    "FIELD_NAME": "value",
-    "SKILLS": ["skill1", "skill2"] // array for skills
+    "title": "Software Engineer",
+    "skills": ["Python", "React"],
+    "salary": "\$100k-120k",
+    "location": "New York",
+    "workplace_type": "remote"
   },
   "confidence": 0.0 to 1.0
 }
@@ -133,6 +133,8 @@ Do not include any explanation, only the JSON.''';
         intent = Intent.jobPost;
       } else if (intentStr == 'INTERVIEW') {
         intent = Intent.interview;
+      } else if (intentStr == 'CANDIDATE_SEARCH') {
+        intent = Intent.candidateSearch;
       }
 
       // Parse fields

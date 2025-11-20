@@ -161,18 +161,70 @@ class TextAnalyzer {
     final normalized = normalize(text);
     final skills = <String>[];
 
-    // Common tech skills database (simplified)
+    // Common tech skills database (comprehensive)
     final knownSkills = [
-      'python', 'java', 'javascript', 'typescript', 'dart', 'flutter',
-      'react', 'angular', 'vue', 'node', 'nodejs', 'express',
-      'django', 'flask', 'spring', 'fastapi',
-      'sql', 'mongodb', 'postgresql', 'mysql', 'redis',
-      'aws', 'azure', 'gcp', 'docker', 'kubernetes',
-      'git', 'ci/cd', 'jenkins', 'terraform',
-      'rest', 'graphql', 'api', 'microservices',
-      'html', 'css', 'sass', 'tailwind',
-      'figma', 'sketch', 'photoshop',
-      'agile', 'scrum', 'jira',
+      // Programming Languages
+      'python', 'java', 'javascript', 'js', 'typescript', 'ts',
+      'c', 'c++', 'cpp', 'c#', 'csharp', 'ruby', 'go', 'golang',
+      'rust', 'swift', 'kotlin', 'dart', 'php', 'perl', 'scala',
+      'r', 'matlab', 'julia', 'elixir', 'haskell', 'lua',
+      'objective-c', 'shell', 'bash', 'powershell',
+      // Web Frontend
+      'html', 'html5', 'css', 'css3', 'sass', 'scss', 'less',
+      'react', 'reactjs', 'react.js', 'angular', 'angularjs',
+      'vue', 'vuejs', 'vue.js', 'svelte', 'ember', 'backbone',
+      'jquery', 'bootstrap', 'tailwind', 'tailwindcss',
+      'webpack', 'vite', 'parcel', 'rollup',
+      // Backend
+      'node', 'nodejs', 'node.js', 'express', 'expressjs',
+      'django', 'flask', 'fastapi', 'spring', 'spring boot',
+      'nest', 'nestjs', '.net', 'dotnet', 'asp.net',
+      'rails', 'ruby on rails', 'laravel', 'symfony',
+      // Mobile
+      'flutter', 'react native', 'ios', 'android',
+      'swift', 'swiftui', 'kotlin', 'xamarin', 'ionic',
+      // Databases
+      'sql', 'nosql', 'mysql', 'postgresql', 'postgres',
+      'mongodb', 'mongo', 'redis', 'elasticsearch', 'cassandra',
+      'dynamodb', 'oracle', 'mssql', 'sqlite', 'mariadb',
+      'neo4j', 'couchdb', 'firebase', 'firestore',
+      // Cloud/DevOps
+      'aws', 'amazon web services', 'azure', 'gcp', 'google cloud',
+      'docker', 'kubernetes', 'k8s', 'helm', 'terraform',
+      'ansible', 'chef', 'puppet', 'jenkins', 'gitlab',
+      'github actions', 'circleci', 'travis', 'ci/cd',
+      'devops', 'sre', 'cloudformation', 'lambda',
+      // Data/AI/ML
+      'machine learning', 'ml', 'deep learning', 'dl',
+      'ai', 'artificial intelligence', 'data science',
+      'tensorflow', 'pytorch', 'keras', 'scikit-learn',
+      'pandas', 'numpy', 'spark', 'hadoop', 'kafka',
+      'airflow', 'etl', 'data warehouse', 'bigquery',
+      // API/Architecture
+      'rest', 'restful', 'graphql', 'grpc', 'soap',
+      'api', 'microservices', 'serverless', 'lambda',
+      'websocket', 'websockets', 'mqtt',
+      // Design/UX
+      'figma', 'sketch', 'adobe xd', 'photoshop', 'illustrator',
+      'ui', 'ux', 'ui/ux', 'user experience', 'user interface',
+      'wireframing', 'prototyping', 'design systems',
+      // Methodologies
+      'agile', 'scrum', 'kanban', 'waterfall', 'lean',
+      'tdd', 'bdd', 'test driven', 'pair programming',
+      // Tools
+      'git', 'github', 'gitlab', 'bitbucket', 'svn',
+      'jira', 'confluence', 'slack', 'trello', 'asana',
+      'postman', 'swagger', 'vs code', 'intellij', 'eclipse',
+      // Security
+      'security', 'cybersecurity', 'penetration testing',
+      'oauth', 'jwt', 'ssl', 'tls', 'encryption',
+      // Soft Skills
+      'leadership', 'communication', 'teamwork', 'problem solving',
+      'project management', 'time management', 'critical thinking',
+      // Business
+      'salesforce', 'sap', 'erp', 'crm', 'excel', 'powerpoint',
+      'word', 'office', 'ms office', 'google workspace',
+      'tableau', 'power bi', 'looker', 'analytics',
     ];
 
     for (var skill in knownSkills) {
@@ -196,6 +248,28 @@ class TextAnalyzer {
     }
 
     return skills.toSet().toList(); // Remove duplicates
+  }
+
+  /// Extract workplace type from text
+  static String? extractWorkplaceType(String text) {
+    final normalized = normalize(text);
+
+    // Workplace type patterns (ordered by specificity)
+    final workplaceTypes = {
+      'remote': ['remote', 'work from home', 'wfh', 'fully remote', 'remotely'],
+      'hybrid': ['hybrid', 'flex', 'flexible', 'part remote', 'remote/onsite'],
+      'onsite': ['onsite', 'on-site', 'in-office', 'office', 'in office', 'on site'],
+    };
+
+    for (var entry in workplaceTypes.entries) {
+      for (var pattern in entry.value) {
+        if (normalized.contains(pattern)) {
+          return _capitalizeTitle(entry.key);
+        }
+      }
+    }
+
+    return null;
   }
 
   static String _capitalizeTitle(String text) {
