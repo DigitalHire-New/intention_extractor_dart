@@ -12,7 +12,7 @@ class TextAnalyzer {
     // Special case: If text starts with seniority level + title words, capture everything until preposition
     // e.g., "senior hiring manager", "vice president of marketing"
     final seniorityPattern = RegExp(
-      r'^((?:senior|junior|lead|principal|associate|assistant|chief|head|vice|deputy|sr|jr)\s+(?:[a-z]+\s+)*(?:manager|engineer|developer|designer|analyst|director|consultant|coordinator|architect|specialist|scientist|representative|administrator|president|recruiter|technologist|auditor|partner|tech)(?:\s+(?:iv|iii|ii|i|4|3|2|1))?)',
+      r'^((?:senior|junior|lead|principal|associate|assistant|chief|head|vice|deputy|sr|jr)\s+(?:[a-z]+\s+)*(?:manager|engineer|developer|designer|analyst|director|consultant|coordinator|architect|specialist|scientist|representative|administrator|president|recruiter|technologist|auditor|partner|tech)(?:\s+(?:iv|iii|ii|i|4|3|2|1)\b)?)',
       caseSensitive: false,
     );
     final seniorityMatch = seniorityPattern.firstMatch(normalized);
@@ -26,7 +26,7 @@ class TextAnalyzer {
     // Special case: "[specialty] [role]" at start of text
     // e.g., "engineering manager", "technical recruiter", "front end developer"
     final specialtyPattern = RegExp(
-      r'^((?:mortgage|real estate|insurance|healthcare|engineering|marketing|sales|product|project|operations|finance|human resources|hr|account|customer|data|software|quality|technical|business|financial|program|category|system|network|backend|frontend|front end|clinical|rehab|integration|support services|business development|product marketing|category marketing|digital marketing|content marketing|social media|community|regional|district|territory|field|corporate|retail|store|pediatric|interventional|radiology|application|service desk|sales operations|compliance)\s+(?:[a-z]+\s+)?(?:manager|engineer|director|lead|head|coordinator|analyst|developer|designer|consultant|architect|specialist|scientist|representative|administrator|liaison|worker|associate|nurse|agent|recruiter|technologist|auditor|partner|tech)(?:\s+(?:iv|iii|ii|i|4|3|2|1))?)',
+      r'^((?:mortgage|real estate|insurance|healthcare|engineering|marketing|sales|product|project|operations|finance|human resources|hr|account|customer|data|software|quality|technical|business|financial|program|category|system|network|backend|frontend|front end|clinical|rehab|integration|support services|business development|product marketing|category marketing|digital marketing|content marketing|social media|community|regional|district|territory|field|corporate|retail|store|pediatric|interventional|radiology|application|service desk|sales operations|compliance)\s+(?:[a-z]+\s+)?(?:manager|engineer|director|lead|head|coordinator|analyst|developer|designer|consultant|architect|specialist|scientist|representative|administrator|liaison|worker|associate|nurse|agent|recruiter|technologist|auditor|partner|tech)(?:\s+(?:iv|iii|ii|i|4|3|2|1)\b)?)',
       caseSensitive: false,
     );
     final specialtyMatch = specialtyPattern.firstMatch(normalized);
@@ -40,7 +40,7 @@ class TextAnalyzer {
     // Common patterns for job titles
     final patterns = [
       // "Programmer Analyst 1", "Software Engineer III" - title with level number
-      RegExp(r'^((?:programmer|software|backend|frontend|full stack|network|system|data|business)\s+(?:analyst|engineer|developer|administrator|architect|scientist)\s+(?:iv|iii|ii|i|\d))(?:\s|$)', caseSensitive: false),
+      RegExp(r'^((?:programmer|software|backend|frontend|full stack|network|system|data|business)\s+(?:analyst|engineer|developer|administrator|architect|scientist)\s+(?:iv|iii|ii|i|\d)\b)(?:\s|$)', caseSensitive: false),
 
       // "entry level [title] jobs", "senior [title] jobs"
       RegExp(r'(?:entry level|entry-level|senior|junior|lead|mid level|mid-level)?\s*([a-z\s]+?)\s+jobs?\s*(?:-|in|at|with|$)', caseSensitive: false),
@@ -58,8 +58,8 @@ class TextAnalyzer {
       RegExp(r'(?:position|role|job):\s*([a-z\s]+?)(?:\s+(?:for|with|in|at)|\s*$)', caseSensitive: false),
 
       // "[title] manager/developer/etc" - Greedy to capture full title including modifiers
-      // This should match "senior hiring manager", capturing "senior hiring" in group 1
-      RegExp(r'([a-z\s]+)\s+(?:manager|developer|engineer|designer|analyst|consultant|architect|director|coordinator)(?:\s|$)', caseSensitive: false),
+      // This should match "senior hiring manager", capturing "senior hiring manager" in group 1
+      RegExp(r'([a-z\s]+(?:manager|developer|engineer|designer|analyst|consultant|architect|director|coordinator))(?:\s|$)', caseSensitive: false),
 
       // Standalone professions and abbreviations
       RegExp(r'\b(?:an?\s+)?(accountant|lawyer|attorney|doctor|nurse|teacher|professor|chef|driver|pilot|scientist|pharmacist|therapist|mechanic|electrician|plumber|technician|recruiter|technologist|auditor|rn)\b', caseSensitive: false),
@@ -92,7 +92,12 @@ class TextAnalyzer {
   static String _filterNonTitleWords(String title) {
     final words = title.toLowerCase().split(' ');
     // Note: "hiring" is NOT in this list because it can be part of job titles like "Hiring Manager"
-    final nonTitleWords = ['post', 'job', 'a', 'an', 'the', 'for', 'with', 'in', 'at', 'to', 'need', 'find'];
+    final nonTitleWords = [
+      'post', 'job', 'a', 'an', 'the', 'for', 'with', 'in', 'at', 'to', 'need', 'find',
+      // Query words
+      'is', 'are', 'there', 'any', 'do', 'we', 'have', 'you', 'got',
+      'looking', 'search', 'searching', 'show', 'me', 'give'
+    ];
 
     final filtered = words.where((word) => !nonTitleWords.contains(word)).join(' ');
     return filtered.trim();
@@ -100,10 +105,14 @@ class TextAnalyzer {
 
   /// Extract location from text
   static String? extractLocation(String text) {
-    // Location patterns
+    final normalized = normalize(text);
+
+    // Skip if the text only contains workplace type keywords without actual locations
+    final workplaceOnlyPattern = RegExp(r'\b(remote|onsite|hybrid|on-site|work from home|wfh)\b', caseSensitive: false);
+
+    // Location patterns (excluding workplace types)
     final patterns = [
       RegExp(r'(?:in|at|from|location:?)\s+([a-z\s,]+?)(?:\s+(?:with|for|who)|\s*$)', caseSensitive: false),
-      RegExp(r'\b(remote|onsite|hybrid|on-site)\b', caseSensitive: false),
       RegExp(r'\b([a-z]+(?:\s+[a-z]+)?),\s*([a-z]{2,})\b', caseSensitive: false), // City, State/Country
     ];
 
@@ -112,7 +121,12 @@ class TextAnalyzer {
       if (match != null) {
         final location = match.group(0)?.trim();
         if (location != null && location.isNotEmpty) {
-          return _capitalizeTitle(location.replaceFirst(RegExp(r'^(?:in|at|from|location:?)\s+', caseSensitive: false), ''));
+          final cleanedLocation = location.replaceFirst(RegExp(r'^(?:in|at|from|location:?)\s+', caseSensitive: false), '');
+
+          // Don't return if it's just a workplace type keyword
+          if (!workplaceOnlyPattern.hasMatch(cleanedLocation)) {
+            return _capitalizeTitle(cleanedLocation);
+          }
         }
       }
     }
@@ -228,8 +242,17 @@ class TextAnalyzer {
     ];
 
     for (var skill in knownSkills) {
-      if (normalized.contains(skill)) {
-        skills.add(_capitalizeTitle(skill));
+      // For single-letter or 2-letter skills, require word boundaries to avoid false matches
+      if (skill.length <= 2) {
+        final regex = RegExp(r'\b' + RegExp.escape(skill) + r'\b', caseSensitive: false);
+        if (regex.hasMatch(normalized)) {
+          skills.add(_capitalizeTitle(skill));
+        }
+      } else {
+        // For longer skills, simple contains is fine
+        if (normalized.contains(skill)) {
+          skills.add(_capitalizeTitle(skill));
+        }
       }
     }
 

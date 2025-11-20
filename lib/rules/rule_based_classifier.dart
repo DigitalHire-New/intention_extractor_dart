@@ -262,7 +262,13 @@ class RuleBasedClassifier {
 
     // Strong indicator: Job title + location pattern (40%)
     // "engineering manager in chicago" should be detected as job post
-    if (_containsJobTitle(text) && _containsLocation(text)) {
+    // BUT: Don't add this if it's a search pattern without hiring terms
+    final isSearchPattern = (text.contains('looking for') || text.contains('find me') ||
+                             text.contains('search for') || text.contains('show me')) &&
+                            !text.contains('hire') && !text.contains('recruit') &&
+                            !text.contains('to hire') && !text.contains('to recruit');
+
+    if (_containsJobTitle(text) && _containsLocation(text) && !isSearchPattern) {
       score += 0.40;
     }
 
@@ -282,6 +288,21 @@ class RuleBasedClassifier {
         score -= 0.40;
         break;
       }
+    }
+
+    // Strong negative for query/existence patterns
+    final queryPatterns = ['is there any', 'are there any', 'is there a', 'are there',
+                           'do we have', 'do you have', 'have any', 'got any'];
+    for (var pattern in queryPatterns) {
+      if (text.contains(pattern)) {
+        score -= 0.50;
+        break;
+      }
+    }
+
+    // Negative for "any [title]" at start - likely a query, not a job post
+    if (text.startsWith('any ') && _containsJobTitle(text)) {
+      score -= 0.60;
     }
 
     // Negative for interview/assessment actions
@@ -527,13 +548,24 @@ class RuleBasedClassifier {
       'filter candidates', 'filter profiles', 'filter resumes',
       'sort candidates', 'sort profiles', 'sort resumes',
       // Query patterns
-      'query candidates', 'query profiles', 'query database'
+      'query candidates', 'query profiles', 'query database',
+      // Existence/Availability queries (60%)
+      'is there any', 'are there any', 'is there a', 'are there',
+      'do we have any', 'do we have', 'do you have any', 'do you have',
+      'have any', 'have we got any', 'got any',
+      'any available', 'anyone available', 'anybody available'
     ];
     for (var pattern in primarySearchPatterns) {
       if (text.contains(pattern)) {
         score += 0.60;
         break;
       }
+    }
+
+    // "any [title]" at start - strong query indicator (65%)
+    // e.g., "any associate engineer in new york", "any python developers"
+    if (score < 0.60 && text.startsWith('any ') && _containsJobTitle(text)) {
+      score += 0.65;
     }
 
     // Search + job title pattern (65%)
