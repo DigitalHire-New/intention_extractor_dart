@@ -1,0 +1,16 @@
+name: user_intent_classifier
+description: A high-performance intent classifier for job-related messages. Classifies user messages into JOB_POST or INTERVIEW intents with field extraction.
+version: 1.0.0
+homepage: https://github.com/digitalhire/user_intent_classifier_dart
+repository: https://github.com/digitalhire/user_intent_classifier_dart
+issue_tracker: https://github.com/digitalhire/user_intent_classifier_dart/issues
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  http: ^1.2.0
+
+dev_dependencies:
+  lints: ^4.0.0
+  test: ^1.25.6

@@ -1,0 +1,11 @@
+name: user_intent_classifier_example
+description: Example application demonstrating the user_intent_classifier package
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  user_intent_classifier:
+    path: ../
