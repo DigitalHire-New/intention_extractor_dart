@@ -48,7 +48,7 @@ Add to your `pubspec.yaml`:
 dependencies:
   user_intent_classifier:
     git:
-      url: https://github.com/digitalhire/user_intent_classifier_dart.git
+      url: https://github.com/DigitalHire-New/intention_extractor_dart.git
 ```
 
 ### Local Path (Development)
@@ -319,5 +319,5 @@ MIT License - see LICENSE file
 ## Support
 
 For issues and questions:
-- GitHub Issues: [your-repo-url/issues]
-- Email: [your-email]
+- GitHub Issues: https://github.com/DigitalHire-New/intention_extractor_dart/issues
+- Repository: https://github.com/DigitalHire-New/intention_extractor_dart
