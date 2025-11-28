@@ -59,7 +59,7 @@ class TextAnalyzer {
 
       // "[title] manager/developer/etc" - Greedy to capture full title including modifiers
       // This should match "senior hiring manager", capturing "senior hiring manager" in group 1
-      RegExp(r'([a-z\s]+(?:manager|developer|engineer|designer|analyst|consultant|architect|director|coordinator))(?:\s|$)', caseSensitive: false),
+      RegExp(r'([a-z\s]+(?:manager|developer|engineer|designer|analyst|consultant|architect|director|coordinator|executive|specialist|representative|administrator))(?:\s|$)', caseSensitive: false),
 
       // Standalone professions and abbreviations
       RegExp(r'\b(?:an?\s+)?(accountant|lawyer|attorney|doctor|nurse|teacher|professor|chef|driver|pilot|scientist|pharmacist|therapist|mechanic|electrician|plumber|technician|recruiter|technologist|auditor|rn)\b', caseSensitive: false),
