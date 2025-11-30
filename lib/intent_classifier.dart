@@ -18,7 +18,7 @@ import 'services/openai_service.dart';
 class IntentClassifier {
   final OpenAIService _openai;
 
-  IntentClassifier() : _openai = OpenAIService(openaiApiKey);
+  IntentClassifier({String? apiKey}) : _openai = OpenAIService(apiKey ?? openaiApiKey);
 
   /// Classify user intent using GPT-3.5-turbo
   ///
