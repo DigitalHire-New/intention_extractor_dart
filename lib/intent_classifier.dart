@@ -1,36 +1,33 @@
 import 'models/classification_result.dart';
-import 'rules/rule_based_classifier.dart';
-import 'services/gemini_service.dart';
+import 'services/openai_service.dart';
 
-/// Hybrid Intent Classifier
+/// Simple Intent Classifier using GPT-3.5-turbo
 ///
-/// Uses a three-tier approach for optimal performance:
-/// - Tier 1: Rule-based classifier (fast, <10ms, 70% coverage)
-/// - Tier 2: ML model (medium, ~150ms, reserved for future)
-/// - Tier 3: Gemini API (accurate, ~500ms, fallback for complex cases)
+/// Classifies user messages into:
+/// - JOB_POST (hiring/recruiting)
+/// - INTERVIEW (scheduling/conducting interviews)
+/// - CANDIDATE_SEARCH (finding/browsing candidates)
+///
+/// Example:
+/// ```dart
+/// final classifier = IntentClassifier(openaiApiKey: 'sk-...');
+/// final result = await classifier.classify('Hire Software Engineer');
+/// print(result.intent); // Intent.jobPost
+/// ```
 class IntentClassifier {
-  final RuleBasedClassifier _ruleClassifier;
-  final GeminiService? _geminiService;
+  final OpenAIService _openai;
 
-  // Configuration
-  final double tier1ConfidenceThreshold;
-  final bool enableApiFailback;
+  IntentClassifier({required String openaiApiKey})
+      : _openai = OpenAIService(openaiApiKey);
 
-  IntentClassifier({
-    String? geminiApiKey,
-    this.tier1ConfidenceThreshold = 0.5,
-    this.enableApiFailback = true,
-  })  : _ruleClassifier = RuleBasedClassifier(),
-        _geminiService = geminiApiKey != null ? GeminiService(apiKey: geminiApiKey) : null;
-
-  /// Classify user message and extract fields
+  /// Classify user intent using GPT-3.5-turbo
   ///
   /// Returns ClassificationResult with:
-  /// - intent: JOB_POST, INTERVIEW, or null
+  /// - intent: JOB_POST, INTERVIEW, CANDIDATE_SEARCH, or null
   /// - fields: Extracted information (job title, location, etc.)
   /// - confidence: 0.0 to 1.0
-  /// - tier: Which classifier was used
-  /// - responseTimeMs: Processing time in milliseconds
+  /// - tier: 'gpt' or 'failed'
+  /// - responseTimeMs: Processing time in milliseconds (target <250ms)
   Future<ClassificationResult> classify(String message) async {
     if (message.trim().isEmpty) {
       return ClassificationResult(
@@ -42,50 +39,15 @@ class IntentClassifier {
       );
     }
 
-    // Tier 1: Try rule-based classifier (fast)
-    final ruleResult = _ruleClassifier.classify(message);
-
-    // If confidence is high enough, return immediately
-    if (ruleResult.confidence >= tier1ConfidenceThreshold) {
-      return ruleResult;
-    }
-
-    // Tier 2: ML model (reserved for future implementation)
-    // TODO: Add TFLite model here
-
-    // Tier 3: Fallback to Gemini API for complex cases
-    if (enableApiFailback && _geminiService != null) {
-      try {
-        final apiResult = await _geminiService!.classify(message);
-
-        // If API provides a better result, use it
-        if (apiResult.intent != null || apiResult.confidence > ruleResult.confidence) {
-          return apiResult;
-        }
-      } catch (e) {
-        // If API fails, fall back to rule-based result
-        print('Gemini API failed: $e');
-      }
-    }
-
-    // Return rule-based result as final fallback
-    return ruleResult;
+    return await _openai.classify(message);
   }
 
-  /// Batch classify multiple messages (for efficiency)
+  /// Batch classify multiple messages
   Future<List<ClassificationResult>> classifyBatch(List<String> messages) async {
     final results = <ClassificationResult>[];
-
     for (var message in messages) {
-      final result = await classify(message);
-      results.add(result);
+      results.add(await classify(message));
     }
-
     return results;
-  }
-
-  /// Classify without API fallback (always fast, under 10ms)
-  ClassificationResult classifyFast(String message) {
-    return _ruleClassifier.classify(message);
   }
 }

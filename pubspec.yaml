@@ -1,6 +1,6 @@
 name: user_intent_classifier
-description: A high-performance intent classifier for job-related messages. Classifies user messages into JOB_POST or INTERVIEW intents with field extraction.
-version: 1.0.0
+description: Ultra-simple intent classifier using GPT-3.5-turbo. Classifies job-related messages into JOB_POST, INTERVIEW, or CANDIDATE_SEARCH intents.
+version: 2.0.0
 homepage: https://github.com/DigitalHire-New/intention_extractor_dart
 repository: https://github.com/DigitalHire-New/intention_extractor_dart
 issue_tracker: https://github.com/DigitalHire-New/intention_extractor_dart/issues
