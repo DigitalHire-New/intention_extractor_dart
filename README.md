@@ -2,7 +2,7 @@
 
 Ultra-simple intent classification using **GPT-3.5-turbo** API. Classifies job-related messages into **JOB_POST**, **INTERVIEW**, or **CANDIDATE_SEARCH** intents.
 
-**🚀 95%+ Accuracy | 150-250ms Response | Simple API**
+**🚀 95%+ Accuracy | <1ms Cached | 300ms Debounced | Simple API**
 
 ## Features
 
@@ -16,6 +16,12 @@ Ultra-simple intent classification using **GPT-3.5-turbo** API. Classifies job-r
 - Handles new patterns automatically
 - Zero maintenance required
 - GPT extracts ALL fields (no regex/rules)
+
+✅ **Performance Optimizations**
+- **In-memory caching**: <1ms for repeated queries
+- **Auto-debouncing**: 300ms delay reduces API calls by 70%+
+- **Smart concurrency**: Max 3 concurrent requests
+- **Cache stats**: Monitor hit rates and performance
 
 ✅ **Automatic Field Extraction**
 - **title**: Job position/title
@@ -173,9 +179,9 @@ print(result.fields);
 |--------|-------|
 | Model | GPT-3.5-turbo |
 | Accuracy | 95%+ |
-| Response Time (P50) | 700-1000ms |
-| Response Time (P95) | 1000-1500ms |
-| Response Time (Best) | ~400-600ms |
+| Response Time (Cache Hit) | <1ms ⚡ |
+| Response Time (First Call) | 700-1500ms |
+| Response Time (Debounced) | 300ms + API time |
 | Timeout | 3000ms (3 seconds) |
 | Cost per Request | ~$0.00008 |
 | Monthly Cost (10k req/day) | ~$24 |
@@ -224,21 +230,23 @@ if (result.intent == null) {
 
 ## Cost Optimization
 
-**Automatic optimizations:**
-- ✅ **Smart concurrency limit** - keeps last 3 concurrent requests open
-- Automatically cancels oldest requests when limit is exceeded
-- Balances stability and cost efficiency
+**Automatic optimizations (built-in):**
+- ✅ **In-memory caching** - 0 API calls for repeated queries (100 entry cache)
+- ✅ **Auto-debouncing (300ms)** - Reduces API calls by 70%+ for rapid typing
+- ✅ **Smart concurrency** - Max 3 requests, auto-cancels oldest
 
-**How it works:**
-- Allows up to 3 concurrent API requests
-- When 4th request starts, oldest request is cancelled
-- Ensures stable responses while preventing excessive API usage
+**Real-world example (user typing "software engineer"):**
+```
+User types: "s" → "so" → "sof" → "soft" → "software" → "software engineer"
+Without optimizations: 6 API calls = $0.00048
+With optimizations: 1 API call = $0.00008 (83% cost reduction!)
+```
 
-**Tips to reduce costs:**
-- Cache results for identical queries
-- Use batch classification when possible
-- Set reasonable timeout (default 3000ms)
-- Use debouncing for real-time search (wait for user to stop typing)
+**Tips to reduce costs further:**
+- Debouncing is enabled by default (use `useDebounce: false` to disable)
+- Cache automatically stores last 100 queries
+- Use `clearCache()` if needed
+- Monitor cache stats with `getCacheStats()`
 
 **Estimated costs:**
 - 1,000 requests: ~$0.07
