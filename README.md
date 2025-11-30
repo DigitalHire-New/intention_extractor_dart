@@ -12,9 +12,10 @@ Ultra-simple intent classification using **GPT-3.5-turbo** API. Classifies job-r
 - **CANDIDATE_SEARCH**: Finding, browsing, querying candidate databases
 
 ✅ **Powered by GPT-3.5-turbo**
-- 95%+ accuracy (vs 83.6% with rules)
+- 95%+ accuracy
 - Handles new patterns automatically
 - Zero maintenance required
+- GPT extracts ALL fields (no regex/rules)
 
 ✅ **Automatic Field Extraction**
 - **title**: Job position/title

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/intent.dart';
 import '../models/classification_result.dart';
-import '../utils/text_analyzer.dart';
 
 /// OpenAI GPT-3.5-turbo service for intent classification
 class OpenAIService {
@@ -27,7 +26,34 @@ class OpenAIService {
           'messages': [
             {
               'role': 'system',
-              'content': 'You are an intent classifier for a hiring platform. Classify messages into: JOB_POST (hiring/recruiting/posting jobs), INTERVIEW (scheduling/conducting interviews), or CANDIDATE_SEARCH (finding/browsing/searching candidates). Respond ONLY with valid JSON: {"intent":"JOB_POST|INTERVIEW|CANDIDATE_SEARCH","confidence":0.0-1.0}'
+              'content': '''You are an intent classifier for a hiring platform.
+
+Classify the message into one of these intents:
+- JOB_POST: hiring, recruiting, posting jobs
+- INTERVIEW: scheduling, conducting interviews
+- CANDIDATE_SEARCH: finding, browsing, searching candidates
+
+Extract ALL relevant fields from the message:
+- title: job position/title
+- skills: array of technical and soft skills
+- salary: compensation information
+- location: work location (city, state, country)
+- workplace_type: "Remote", "Hybrid", or "Onsite"
+- experience: years of experience required
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "intent": "JOB_POST|INTERVIEW|CANDIDATE_SEARCH",
+  "confidence": 0.0-1.0,
+  "fields": {
+    "title": "extracted title or null",
+    "skills": ["skill1", "skill2"] or [],
+    "salary": "extracted salary or null",
+    "location": "extracted location or null",
+    "workplace_type": "Remote|Hybrid|Onsite or null",
+    "experience": "extracted experience or null"
+  }
+}'''
             },
             {
               'role': 'user',
@@ -35,7 +61,7 @@ class OpenAIService {
             }
           ],
           'temperature': 0,
-          'max_tokens': 50,
+          'max_tokens': 200,
         }),
       ).timeout(Duration(milliseconds: _timeoutMs));
 
@@ -49,7 +75,19 @@ class OpenAIService {
         else if (result['intent'] == 'INTERVIEW') intent = Intent.interview;
         else if (result['intent'] == 'CANDIDATE_SEARCH') intent = Intent.candidateSearch;
 
-        final fields = _extractFields(message, intent);
+        // Extract fields from GPT response - remove null and empty values
+        final rawFields = result['fields'] as Map<String, dynamic>? ?? {};
+        final fields = <String, dynamic>{};
+        rawFields.forEach((key, value) {
+          if (value != null && value != 'null') {
+            // Skip empty arrays
+            if (value is List && value.isEmpty) return;
+            // Skip empty strings
+            if (value is String && value.trim().isEmpty) return;
+            fields[key] = value;
+          }
+        });
+
         final responseTime = DateTime.now().difference(startTime).inMilliseconds;
 
         return ClassificationResult(
@@ -81,33 +119,5 @@ class OpenAIService {
       tier: 'failed',
       responseTimeMs: responseTime,
     );
-  }
-
-  Map<String, dynamic> _extractFields(String message, Intent? intent) {
-    // Reuse existing TextAnalyzer for field extraction
-    final fields = <String, dynamic>{};
-    if (intent == null) return fields;
-
-    final jobTitle = TextAnalyzer.extractJobTitle(message);
-    if (jobTitle != null) fields['title'] = jobTitle;
-
-    final skills = TextAnalyzer.extractSkills(message);
-    if (skills.isNotEmpty) fields['skills'] = skills;
-
-    final salary = TextAnalyzer.extractCompensation(message);
-    if (salary != null) fields['salary'] = salary;
-
-    final location = TextAnalyzer.extractLocation(message);
-    if (location != null) fields['location'] = location;
-
-    final workplaceType = TextAnalyzer.extractWorkplaceType(message);
-    if (workplaceType != null) fields['workplace_type'] = workplaceType;
-
-    if (intent == Intent.jobPost) {
-      final experience = TextAnalyzer.extractExperience(message);
-      if (experience != null) fields['experience'] = experience;
-    }
-
-    return fields;
   }
 }
