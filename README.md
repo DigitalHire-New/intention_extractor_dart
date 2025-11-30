@@ -39,16 +39,17 @@ dart pub get
 
 ### 1. Add Your OpenAI API Key
 
-Before using the classifier, create the API keys configuration file:
+Before using the classifier, add your OpenAI API key to the configuration file:
 
-1. Copy the template: `cp lib/config/api_keys.dart.template lib/config/api_keys.dart`
-2. Edit `lib/config/api_keys.dart` and add your API key:
+**File:** `lib/config/api_keys.dart`
 
 ```dart
 const String openaiApiKey = 'sk-proj-your-actual-api-key-here';
 ```
 
 Get your API key from: [OpenAI Platform](https://platform.openai.com/api-keys)
+
+**Important:** Never commit your real API key. The file is tracked with a placeholder value.
 
 ### 2. Quick Start
 
