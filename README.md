@@ -173,11 +173,12 @@ print(result.fields);
 |--------|-------|
 | Model | GPT-3.5-turbo |
 | Accuracy | 95%+ |
-| Response Time (P50) | 500-800ms |
-| Response Time (P95) | 800-1200ms |
-| Timeout | 5000ms (5 seconds) |
-| Cost per Request | ~$0.0001 |
-| Monthly Cost (10k req/day) | ~$21 |
+| Response Time (P50) | 700-1000ms |
+| Response Time (P95) | 1000-1500ms |
+| Response Time (Best) | ~400-600ms |
+| Timeout | 3000ms (3 seconds) |
+| Cost per Request | ~$0.00008 |
+| Monthly Cost (10k req/day) | ~$24 |
 
 ## Migration from v1.x
 
@@ -236,7 +237,8 @@ if (result.intent == null) {
 **Tips to reduce costs:**
 - Cache results for identical queries
 - Use batch classification when possible
-- Set reasonable timeout (default 5000ms)
+- Set reasonable timeout (default 3000ms)
+- Use debouncing for real-time search (wait for user to stop typing)
 
 **Estimated costs:**
 - 1,000 requests: ~$0.07

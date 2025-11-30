@@ -8,7 +8,7 @@ import '../models/classification_result.dart';
 class OpenAIService {
   final String apiKey;
   static const String _baseUrl = 'https://api.openai.com/v1/chat/completions';
-  static const int _timeoutMs = 5000; // 5 second timeout
+  static const int _timeoutMs = 3000; // 3 second timeout for faster responses
   static const int _maxConcurrentRequests = 3; // Keep last 3 requests open
 
   // Track active requests to manage concurrency
@@ -41,7 +41,7 @@ class OpenAIService {
           'messages': [
             {
               'role': 'system',
-              'content': 'You are an intent classifier for a hiring platform. Classify the user message into JOB_POST (hiring/recruiting), INTERVIEW (scheduling interviews), or CANDIDATE_SEARCH (finding candidates). Extract fields: title (job position), skills (array), salary, location, workplace_type (Remote/Hybrid/Onsite), experience. Return JSON: {"intent":"JOB_POST|INTERVIEW|CANDIDATE_SEARCH","confidence":0.0-1.0,"fields":{"title":"value or null","skills":["skill1"],"salary":"value or null","location":"value or null","workplace_type":"value or null","experience":"value or null"}}'
+              'content': 'Classify hiring message into JOB_POST/INTERVIEW/CANDIDATE_SEARCH. Extract: title, skills, salary, location, workplace_type, experience. Return JSON: {"intent":"JOB_POST|INTERVIEW|CANDIDATE_SEARCH","confidence":0-1,"fields":{"title":null,"skills":[],"salary":null,"location":null,"workplace_type":null,"experience":null}}'
             },
             {
               'role': 'user',
@@ -49,7 +49,8 @@ class OpenAIService {
             }
           ],
           'temperature': 0,
-          'max_tokens': 200,
+          'max_tokens': 80,
+          'stream': false,
         }),
       ).timeout(Duration(milliseconds: _timeoutMs));
 
