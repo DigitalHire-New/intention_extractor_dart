@@ -86,7 +86,17 @@ class IntentClassifier {
   Future<ClassificationResult> _classifyWithDebounce(String message, String normalizedMessage) async {
     // Cancel previous debounce timer
     _debounceTimer?.cancel();
-    _debounceCompleter?.completeError('Cancelled by new request');
+
+    // Complete previous request with cancelled result (no error thrown)
+    if (_debounceCompleter != null && !_debounceCompleter!.isCompleted) {
+      _debounceCompleter!.complete(ClassificationResult(
+        intent: null,
+        fields: {},
+        confidence: 0.0,
+        tier: 'debounce_cancelled',
+        responseTimeMs: 0,
+      ));
+    }
 
     // Create new completer for this request
     _debounceCompleter = Completer<ClassificationResult>();
@@ -102,7 +112,13 @@ class IntentClassifier {
           }
         } catch (e) {
           if (!_debounceCompleter!.isCompleted) {
-            _debounceCompleter!.completeError(e);
+            _debounceCompleter!.complete(ClassificationResult(
+              intent: null,
+              fields: {},
+              confidence: 0.0,
+              tier: 'failed',
+              responseTimeMs: 0,
+            ));
           }
         }
       }
