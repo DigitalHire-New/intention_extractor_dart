@@ -172,8 +172,9 @@ print(result.fields);
 |--------|-------|
 | Model | GPT-3.5-turbo |
 | Accuracy | 95%+ |
-| Response Time (P50) | 150-200ms |
-| Response Time (P95) | 200-250ms |
+| Response Time (P50) | 500-800ms |
+| Response Time (P95) | 800-1200ms |
+| Timeout | 5000ms (5 seconds) |
 | Cost per Request | ~$0.0001 |
 | Monthly Cost (10k req/day) | ~$21 |
 
@@ -195,7 +196,7 @@ final result = await classifier.classify(text);
 ### Breaking Changes
 - OpenAI API key now required (configure in `lib/config/api_keys.dart`)
 - No offline mode (requires internet)
-- Response time 150-250ms (was <35ms)
+- Response time 500-1200ms (was <35ms)
 - Small cost per request (was free)
 
 ### Benefits
@@ -207,7 +208,7 @@ final result = await classifier.classify(text);
 
 ## Error Handling
 
-If the API fails or times out (>250ms), the classifier returns null intent:
+If the API fails or times out (>5000ms), the classifier returns null intent:
 
 ```dart
 final classifier = IntentClassifier();
@@ -224,7 +225,7 @@ if (result.intent == null) {
 **Tips to reduce costs:**
 - Cache results for identical queries
 - Use batch classification when possible
-- Set reasonable timeout (default 250ms)
+- Set reasonable timeout (default 5000ms)
 
 **Estimated costs:**
 - 1,000 requests: ~$0.07

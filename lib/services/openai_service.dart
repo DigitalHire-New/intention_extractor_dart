@@ -8,7 +8,7 @@ import '../utils/text_analyzer.dart';
 class OpenAIService {
   final String apiKey;
   static const String _baseUrl = 'https://api.openai.com/v1/chat/completions';
-  static const int _timeoutMs = 250; // 250ms timeout
+  static const int _timeoutMs = 5000; // 5 second timeout
 
   OpenAIService(this.apiKey);
 
