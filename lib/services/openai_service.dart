@@ -26,34 +26,7 @@ class OpenAIService {
           'messages': [
             {
               'role': 'system',
-              'content': '''You are an intent classifier for a hiring platform.
-
-Classify the message into one of these intents:
-- JOB_POST: hiring, recruiting, posting jobs
-- INTERVIEW: scheduling, conducting interviews
-- CANDIDATE_SEARCH: finding, browsing, searching candidates
-
-Extract ALL relevant fields from the message:
-- title: job position/title
-- skills: array of technical and soft skills
-- salary: compensation information
-- location: work location (city, state, country)
-- workplace_type: "Remote", "Hybrid", or "Onsite"
-- experience: years of experience required
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "intent": "JOB_POST|INTERVIEW|CANDIDATE_SEARCH",
-  "confidence": 0.0-1.0,
-  "fields": {
-    "title": "extracted title or null",
-    "skills": ["skill1", "skill2"] or [],
-    "salary": "extracted salary or null",
-    "location": "extracted location or null",
-    "workplace_type": "Remote|Hybrid|Onsite or null",
-    "experience": "extracted experience or null"
-  }
-}'''
+              'content': 'You are an intent classifier for a hiring platform. Classify the user message into JOB_POST (hiring/recruiting), INTERVIEW (scheduling interviews), or CANDIDATE_SEARCH (finding candidates). Extract fields: title (job position), skills (array), salary, location, workplace_type (Remote/Hybrid/Onsite), experience. Return JSON: {"intent":"JOB_POST|INTERVIEW|CANDIDATE_SEARCH","confidence":0.0-1.0,"fields":{"title":"value or null","skills":["skill1"],"salary":"value or null","location":"value or null","workplace_type":"value or null","experience":"value or null"}}'
             },
             {
               'role': 'user',
