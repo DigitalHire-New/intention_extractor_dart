@@ -224,8 +224,14 @@ if (result.intent == null) {
 ## Cost Optimization
 
 **Automatic optimizations:**
-- ✅ **Auto-cancels previous request** when new request arrives (saves cost!)
-- Previous incomplete requests are cancelled to avoid unnecessary API charges
+- ✅ **Smart concurrency limit** - keeps last 3 concurrent requests open
+- Automatically cancels oldest requests when limit is exceeded
+- Balances stability and cost efficiency
+
+**How it works:**
+- Allows up to 3 concurrent API requests
+- When 4th request starts, oldest request is cancelled
+- Ensures stable responses while preventing excessive API usage
 
 **Tips to reduce costs:**
 - Cache results for identical queries
@@ -237,7 +243,7 @@ if (result.intent == null) {
 - 10,000 requests: ~$0.70
 - 100,000 requests: ~$7.00
 
-**Note:** With auto-cancellation, rapid successive requests (like user typing) only charge for the final request.
+**Note:** With smart concurrency, rapid successive requests maintain stability while optimizing costs.
 
 ## License
 

@@ -9,21 +9,28 @@ class OpenAIService {
   final String apiKey;
   static const String _baseUrl = 'https://api.openai.com/v1/chat/completions';
   static const int _timeoutMs = 5000; // 5 second timeout
+  static const int _maxConcurrentRequests = 3; // Keep last 3 requests open
 
-  // Track the current request to cancel it when a new one arrives
-  http.Client? _currentClient;
+  // Track active requests to manage concurrency
+  final List<http.Client> _activeClients = [];
 
   OpenAIService(this.apiKey);
 
   Future<ClassificationResult> classify(String message) async {
     final startTime = DateTime.now();
 
-    // Cancel previous request if still running
-    _currentClient?.close();
-    _currentClient = http.Client();
+    // Create new client for this request
+    final client = http.Client();
+    _activeClients.add(client);
+
+    // Cancel oldest requests if we exceed the limit
+    while (_activeClients.length > _maxConcurrentRequests) {
+      final oldestClient = _activeClients.removeAt(0);
+      oldestClient.close();
+    }
 
     try {
-      final response = await _currentClient!.post(
+      final response = await client.post(
         Uri.parse(_baseUrl),
         headers: {
           'Content-Type': 'application/json',
@@ -94,9 +101,9 @@ class OpenAIService {
         responseTimeMs: responseTime,
       );
     } finally {
-      // Clean up client after request completes
-      _currentClient?.close();
-      _currentClient = null;
+      // Clean up this client after request completes
+      _activeClients.remove(client);
+      client.close();
     }
 
     // Fallback - return null
@@ -110,9 +117,11 @@ class OpenAIService {
     );
   }
 
-  /// Dispose resources
+  /// Dispose resources - close all active clients
   void dispose() {
-    _currentClient?.close();
-    _currentClient = null;
+    for (var client in _activeClients) {
+      client.close();
+    }
+    _activeClients.clear();
   }
 }
