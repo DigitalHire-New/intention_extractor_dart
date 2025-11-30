@@ -223,6 +223,10 @@ if (result.intent == null) {
 
 ## Cost Optimization
 
+**Automatic optimizations:**
+- ✅ **Auto-cancels previous request** when new request arrives (saves cost!)
+- Previous incomplete requests are cancelled to avoid unnecessary API charges
+
 **Tips to reduce costs:**
 - Cache results for identical queries
 - Use batch classification when possible
@@ -232,6 +236,8 @@ if (result.intent == null) {
 - 1,000 requests: ~$0.07
 - 10,000 requests: ~$0.70
 - 100,000 requests: ~$7.00
+
+**Note:** With auto-cancellation, rapid successive requests (like user typing) only charge for the final request.
 
 ## License
 

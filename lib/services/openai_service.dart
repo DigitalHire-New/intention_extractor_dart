@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/intent.dart';
@@ -9,13 +10,20 @@ class OpenAIService {
   static const String _baseUrl = 'https://api.openai.com/v1/chat/completions';
   static const int _timeoutMs = 5000; // 5 second timeout
 
+  // Track the current request to cancel it when a new one arrives
+  http.Client? _currentClient;
+
   OpenAIService(this.apiKey);
 
   Future<ClassificationResult> classify(String message) async {
     final startTime = DateTime.now();
 
+    // Cancel previous request if still running
+    _currentClient?.close();
+    _currentClient = http.Client();
+
     try {
-      final response = await http.post(
+      final response = await _currentClient!.post(
         Uri.parse(_baseUrl),
         headers: {
           'Content-Type': 'application/json',
@@ -72,15 +80,23 @@ class OpenAIService {
         );
       }
     } catch (e) {
-      // API failed or timed out - return null
+      // API failed, timed out, or was cancelled
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
+
+      // Check if request was cancelled
+      final tier = e.toString().contains('ClientException') ? 'cancelled' : 'failed';
+
       return ClassificationResult(
         intent: null,
         fields: {},
         confidence: 0.0,
-        tier: 'failed',
+        tier: tier,
         responseTimeMs: responseTime,
       );
+    } finally {
+      // Clean up client after request completes
+      _currentClient?.close();
+      _currentClient = null;
     }
 
     // Fallback - return null
@@ -92,5 +108,11 @@ class OpenAIService {
       tier: 'failed',
       responseTimeMs: responseTime,
     );
+  }
+
+  /// Dispose resources
+  void dispose() {
+    _currentClient?.close();
+    _currentClient = null;
   }
 }
