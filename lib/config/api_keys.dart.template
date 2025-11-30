@@ -1,0 +1,9 @@
+/// API Keys Configuration
+///
+/// IMPORTANT: Add your OpenAI API key here before using the classifier.
+///
+/// Get your API key from: https://platform.openai.com/api-keys
+///
+/// Example:
+/// const String openaiApiKey = 'sk-proj-abc123...';
+const String openaiApiKey = 'your-openai-api-key-here';

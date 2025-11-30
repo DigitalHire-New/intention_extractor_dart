@@ -3,7 +3,7 @@ import 'package:user_intent_classifier/user_intent_classifier.dart';
 void main() async {
   print('=== User Intent Classifier Example ===\n');
 
-  // Initialize classifier (offline mode - no API key)
+  // Initialize classifier (uses API key from lib/config/api_keys.dart)
   final classifier = IntentClassifier();
 
   // Example 1: Job Posting

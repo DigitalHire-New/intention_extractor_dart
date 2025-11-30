@@ -1,3 +1,4 @@
+import 'config/api_keys.dart';
 import 'models/classification_result.dart';
 import 'services/openai_service.dart';
 
@@ -10,15 +11,14 @@ import 'services/openai_service.dart';
 ///
 /// Example:
 /// ```dart
-/// final classifier = IntentClassifier(openaiApiKey: 'sk-...');
+/// final classifier = IntentClassifier();
 /// final result = await classifier.classify('Hire Software Engineer');
 /// print(result.intent); // Intent.jobPost
 /// ```
 class IntentClassifier {
   final OpenAIService _openai;
 
-  IntentClassifier({required String openaiApiKey})
-      : _openai = OpenAIService(openaiApiKey);
+  IntentClassifier() : _openai = OpenAIService(openaiApiKey);
 
   /// Classify user intent using GPT-3.5-turbo
   ///

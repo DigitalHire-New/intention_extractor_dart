@@ -35,16 +35,29 @@ Then run:
 dart pub get
 ```
 
-## Quick Start
+## Configuration
+
+### 1. Add Your OpenAI API Key
+
+Before using the classifier, create the API keys configuration file:
+
+1. Copy the template: `cp lib/config/api_keys.dart.template lib/config/api_keys.dart`
+2. Edit `lib/config/api_keys.dart` and add your API key:
+
+```dart
+const String openaiApiKey = 'sk-proj-your-actual-api-key-here';
+```
+
+Get your API key from: [OpenAI Platform](https://platform.openai.com/api-keys)
+
+### 2. Quick Start
 
 ```dart
 import 'package:user_intent_classifier/user_intent_classifier.dart';
 
 void main() async {
-  // Initialize with OpenAI API key
-  final classifier = IntentClassifier(
-    openaiApiKey: 'sk-your-api-key',
-  );
+  // Initialize classifier (uses API key from config)
+  final classifier = IntentClassifier();
 
   // Classify a message
   final result = await classifier.classify(
@@ -63,8 +76,10 @@ void main() async {
 ### IntentClassifier
 
 ```dart
-IntentClassifier({required String openaiApiKey})
+IntentClassifier()
 ```
+
+**Note:** The classifier uses the OpenAI API key from `lib/config/api_keys.dart`.
 
 ### Methods
 
@@ -109,6 +124,7 @@ enum Intent {
 ### Job Posting Classification
 
 ```dart
+final classifier = IntentClassifier();
 final result = await classifier.classify(
   'Looking for Flutter developer in New York, salary \$120k, remote work'
 );
@@ -127,6 +143,7 @@ print(result.fields);
 ### Interview Scheduling
 
 ```dart
+final classifier = IntentClassifier();
 final result = await classifier.classify(
   'Schedule an interview with John tomorrow at 3 PM'
 );
@@ -138,6 +155,7 @@ print(result.confidence);  // 0.92
 ### Candidate Search
 
 ```dart
+final classifier = IntentClassifier();
 final result = await classifier.classify(
   'Find senior Python developers with AWS experience'
 );
@@ -168,14 +186,13 @@ final result = await classifier.classify(text);
 
 ### After (v2.0 - GPT-based)
 ```dart
-final classifier = IntentClassifier(
-  openaiApiKey: 'sk-...',  // API key required
-);
+// Add your API key to lib/config/api_keys.dart first
+final classifier = IntentClassifier();
 final result = await classifier.classify(text);
 ```
 
 ### Breaking Changes
-- OpenAI API key now required
+- OpenAI API key now required (configure in `lib/config/api_keys.dart`)
 - No offline mode (requires internet)
 - Response time 150-250ms (was <35ms)
 - Small cost per request (was free)
@@ -186,26 +203,13 @@ final result = await classifier.classify(text);
 - Handles new patterns automatically
 - Simpler codebase
 
-## Configuration
-
-### Get OpenAI API Key
-
-1. Sign up at [OpenAI Platform](https://platform.openai.com/)
-2. Create an API key
-3. Pass to classifier constructor
-
-### Environment Variable (Recommended)
-
-```dart
-final apiKey = Platform.environment['OPENAI_API_KEY']!;
-final classifier = IntentClassifier(openaiApiKey: apiKey);
-```
 
 ## Error Handling
 
 If the API fails or times out (>250ms), the classifier returns null intent:
 
 ```dart
+final classifier = IntentClassifier();
 final result = await classifier.classify('test message');
 
 if (result.intent == null) {
