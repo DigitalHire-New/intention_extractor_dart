@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'config/api_keys.dart';
 import 'models/classification_result.dart';
+import 'models/intent.dart';
 import 'services/openai_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
