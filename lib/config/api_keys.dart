@@ -10,4 +10,4 @@
 /// NOTE: This file is tracked in git with a placeholder value.
 /// Replace the placeholder with your actual API key locally.
 /// Never commit your real API key to version control.
-const String openaiApiKey = 'your-openai-api-key-here';
+const String openaiApiKey = '';
