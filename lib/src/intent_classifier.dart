@@ -114,7 +114,7 @@ Rules:
   ClassificationResult _parseResponse(Map<String, dynamic> response) {
     try {
       // Intent is always createJobPost
-      final intent = UserIntent.createJobPost;
+      const intent = UserIntent.createJobPost;
 
       // Parse fields
       final fields = <String, dynamic>{};
