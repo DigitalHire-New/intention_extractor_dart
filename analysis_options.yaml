@@ -1,0 +1,19 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - example/flutter_integration.dart
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_fields
+    - prefer_final_locals
+    - unnecessary_this
+    - avoid_unnecessary_containers
+    - prefer_is_empty
+    - prefer_is_not_empty
+    - prefer_if_null_operators
+    - prefer_null_aware_operators
