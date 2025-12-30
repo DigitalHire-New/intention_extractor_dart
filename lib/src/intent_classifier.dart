@@ -27,7 +27,7 @@ class IntentClassifier {
   Future<ClassificationResult> classify(String text) async {
     if (text.trim().isEmpty) {
       return ClassificationResult(
-        intent: UserIntent.unknown,
+        intent: UserIntent.createJobPost,
         fields: {},
         confidence: 0.0,
       );
@@ -39,7 +39,7 @@ class IntentClassifier {
     } catch (e) {
       // Return a default result on error
       return ClassificationResult(
-        intent: UserIntent.searchJob,
+        intent: UserIntent.createJobPost,
         fields: {},
         confidence: 0.0,
         rawResponse: e.toString(),
@@ -50,21 +50,19 @@ class IntentClassifier {
   Future<Map<String, dynamic>> _callOpenAI(String text) async {
     final url = Uri.parse('$baseUrl/chat/completions');
 
-    const systemPrompt = '''You are an expert job search intent classifier. Analyze the user's query and extract structured information.
+    const systemPrompt = '''You are an expert at extracting structured information from job posting descriptions. Analyze the user's query and extract relevant fields.
 
 Your task:
-1. Identify the user's intent (search_job, find_similar, job_description, boolean, or select_manually)
-2. Extract relevant fields from the query:
-   - title: Job title or role (e.g., "Python Developer", "Senior Software Engineer")
-   - location: Location mentioned (e.g., "New York", "San Francisco", "remote")
-   - experience: Years of experience (extract number, e.g., "10", "5")
-   - skills: Technical or professional skills (e.g., ["Python", "Django", "AWS"])
-   - salary: Salary information if mentioned (e.g., "100k", "150000")
-   - industry: Industry or domain (e.g., "fintech", "healthcare", "e-commerce")
+Extract relevant fields from the query:
+- title: Job title or role (e.g., "Python Developer", "Senior Software Engineer")
+- location: Location mentioned (e.g., "New York", "San Francisco", "remote")
+- experience: Years of experience (extract number, e.g., "10", "5")
+- skills: Technical or professional skills (e.g., ["Python", "Django", "AWS"])
+- salary: Salary information if mentioned (e.g., "100k", "150000")
+- industry: Industry or domain (e.g., "fintech", "healthcare", "e-commerce")
 
 Return ONLY a JSON object with this exact structure:
 {
-  "intent": "search_job",
   "fields": {
     "title": "value",
     "location": "value",
@@ -80,9 +78,8 @@ Rules:
 - Only include fields that are explicitly mentioned or clearly implied
 - For skills, always use an array even if single skill
 - For experience, extract just the number
-- intent should be one of: search_job, find_similar, job_description, boolean, select_manually
-- If unclear, use "search_job" as default intent
-- confidence should be 0.0 to 1.0''';
+- Omit fields that are not mentioned in the query
+- confidence should be 0.0 to 1.0 based on how clear the information is''';
 
     final requestBody = {
       'model': model,
@@ -116,34 +113,8 @@ Rules:
 
   ClassificationResult _parseResponse(Map<String, dynamic> response) {
     try {
-      // Parse intent
-      UserIntent? intent;
-      final intentStr = response['intent']?.toString().toLowerCase();
-      if (intentStr != null) {
-        switch (intentStr) {
-          case 'search_job':
-          case 'searchjob':
-            intent = UserIntent.searchJob;
-            break;
-          case 'find_similar':
-          case 'findsimilar':
-            intent = UserIntent.findSimilar;
-            break;
-          case 'job_description':
-          case 'jobdescription':
-            intent = UserIntent.jobDescription;
-            break;
-          case 'boolean':
-            intent = UserIntent.boolean;
-            break;
-          case 'select_manually':
-          case 'selectmanually':
-            intent = UserIntent.selectManually;
-            break;
-          default:
-            intent = UserIntent.searchJob;
-        }
-      }
+      // Intent is always createJobPost
+      final intent = UserIntent.createJobPost;
 
       // Parse fields
       final fields = <String, dynamic>{};
@@ -187,7 +158,7 @@ Rules:
       );
     } catch (e) {
       return ClassificationResult(
-        intent: UserIntent.searchJob,
+        intent: UserIntent.createJobPost,
         fields: {},
         confidence: 0.0,
         rawResponse: 'Parse error: $e',

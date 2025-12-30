@@ -1,15 +1,16 @@
 # Intent Classifier
 
-A powerful Dart package for intelligent job search intent classification using OpenAI GPT. Accurately detects user intent and extracts structured fields (title, location, experience, skills, salary, industry) from natural language queries.
+A powerful Dart package for extracting structured job posting information using OpenAI GPT. Automatically extracts fields (title, location, experience, skills, salary, industry) from natural language job posting descriptions.
 
 ## Features
 
-- **Accurate NLP Detection**: Uses GPT-4 for highly accurate intent classification
-- **Field Extraction**: Automatically extracts job title, location, experience, skills, salary, and industry
+- **Accurate NLP Field Extraction**: Uses GPT-4 for highly accurate field detection
+- **Comprehensive Field Detection**: Automatically extracts job title, location, experience, skills, salary, and industry
 - **Industry Agnostic**: Works with any industry, skill set, title, location, or experience level
 - **Simple API**: Easy-to-use interface with async/await support
 - **Type Safe**: Full Dart type safety with enums and models
 - **Flutter Ready**: Perfect for Flutter applications with debouncing examples
+- **Always CreateJobPost Intent**: Focused on job posting creation with consistent intent
 
 ## Installation
 

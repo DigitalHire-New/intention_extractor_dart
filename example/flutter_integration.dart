@@ -21,9 +21,6 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
   // Debounce timer to avoid excessive API calls
   Timer? debounceTimer;
 
-  // Track user intent
-  UserIntent _tempIntent = UserIntent.searchJob;
-
   // Track which fields are detected
   Map<String, bool> selectedJobPostChip = {
     'title': false,
@@ -32,15 +29,6 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
     'skills': false,
     'salary': false,
     'industry': false,
-  };
-
-  // Map of intent strings to UserIntent enum
-  final Map<String, UserIntent> intentMap = {
-    'search_job': UserIntent.searchJob,
-    'find_similar': UserIntent.findSimilar,
-    'job_description': UserIntent.jobDescription,
-    'boolean': UserIntent.boolean,
-    'select_manually': UserIntent.selectManually,
   };
 
   Future<void> filterIntent(String text) async {
@@ -53,22 +41,13 @@ class _JobSearchScreenState extends State<JobSearchScreen> {
         final res = await classifier.classify(text);
         print("Classifier Intent: ${res.intent} | Fields: ${res.fields}");
 
-        if (res.intent == null) {
-          _tempIntent = UserIntent.searchJob;
-          // Reset all chips
-          selectedJobPostChip.updateAll((key, value) => false);
-        } else {
-          _tempIntent = res.intent!;
-
-          // Update chips based on detected fields
-          selectedJobPostChip['title'] = res.fields.containsKey('title');
-          selectedJobPostChip['location'] = res.fields.containsKey('location');
-          selectedJobPostChip['experience'] =
-              res.fields.containsKey('experience');
-          selectedJobPostChip['skills'] = res.fields.containsKey('skills');
-          selectedJobPostChip['salary'] = res.fields.containsKey('salary');
-          selectedJobPostChip['industry'] = res.fields.containsKey('industry');
-        }
+        // Update chips based on detected fields (intent is always createJobPost)
+        selectedJobPostChip['title'] = res.fields.containsKey('title');
+        selectedJobPostChip['location'] = res.fields.containsKey('location');
+        selectedJobPostChip['experience'] = res.fields.containsKey('experience');
+        selectedJobPostChip['skills'] = res.fields.containsKey('skills');
+        selectedJobPostChip['salary'] = res.fields.containsKey('salary');
+        selectedJobPostChip['industry'] = res.fields.containsKey('industry');
 
         setState(() {});
       } catch (e) {
