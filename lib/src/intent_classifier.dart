@@ -1,29 +1,53 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'models.dart';
+import 'offline_classifier.dart';
 
 /// Main class for classifying user intent in job search queries
+///
+/// Supports two modes:
+/// - ONLINE: When apiKey is provided, uses OpenAI GPT (accurate, costs money)
+/// - OFFLINE: When apiKey is null, uses regex patterns (instant, free, no internet)
 class IntentClassifier {
-  final String apiKey;
+  final String? apiKey;
   final String model;
   final String baseUrl;
+  final bool _useOfflineMode;
+  late final OfflineIntentClassifier _offlineClassifier;
 
   /// Creates an IntentClassifier instance
   ///
-  /// [apiKey] - Your OpenAI API key
+  /// [apiKey] - Your OpenAI API key (optional - if null, uses offline mode)
   /// [model] - The GPT model to use (default: gpt-4o-mini for cost-effectiveness)
   /// [baseUrl] - OpenAI API base URL (default: https://api.openai.com/v1)
+  ///
+  /// Examples:
+  /// ```dart
+  /// // OFFLINE mode (free, instant, no API)
+  /// final classifier = IntentClassifier();
+  ///
+  /// // ONLINE mode (accurate, requires API key)
+  /// final classifier = IntentClassifier(apiKey: 'sk-...');
+  /// ```
   IntentClassifier({
-    required this.apiKey,
+    this.apiKey,
     this.model = 'gpt-4o-mini',
     this.baseUrl = 'https://api.openai.com/v1',
-  });
+  }) : _useOfflineMode = apiKey == null {
+    if (_useOfflineMode) {
+      _offlineClassifier = OfflineIntentClassifier();
+    }
+  }
 
   /// Classifies the given text to extract intent and job search fields
   ///
   /// Returns a [ClassificationResult] containing:
   /// - intent: The detected user intent
   /// - fields: Extracted fields (title, location, experience, skills, salary, industry)
+  ///
+  /// Mode selection:
+  /// - If apiKey was provided: Uses OpenAI GPT (online, accurate)
+  /// - If apiKey is null: Uses offline regex patterns (instant, free)
   Future<ClassificationResult> classify(String text) async {
     if (text.trim().isEmpty) {
       return ClassificationResult(
@@ -33,6 +57,12 @@ class IntentClassifier {
       );
     }
 
+    // Use offline mode if no API key
+    if (_useOfflineMode) {
+      return _offlineClassifier.classify(text);
+    }
+
+    // Use online mode (OpenAI)
     try {
       final response = await _callOpenAI(text);
       return _parseResponse(response);
@@ -48,6 +78,11 @@ class IntentClassifier {
   }
 
   Future<Map<String, dynamic>> _callOpenAI(String text) async {
+    // This should never be called in offline mode, but add check for safety
+    if (apiKey == null) {
+      throw Exception('API key is required for online mode');
+    }
+
     final url = Uri.parse('$baseUrl/chat/completions');
 
     const systemPrompt = '''You are an expert at extracting structured information from job posting descriptions. Analyze the user's query and extract relevant fields.
