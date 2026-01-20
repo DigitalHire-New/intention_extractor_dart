@@ -481,6 +481,11 @@ class OfflineIntentClassifier {
     // Pattern: "need/looking for/hiring {prefix} {role}"
     for (final suffix in roleSuffixes) {
       final patterns = [
+        // "i want to create job post for python developer"
+        // "create job post for python developer"
+        RegExp('(?:create|make|post|add)\\s+(?:a\\s+|an\\s+)?(?:job\\s+post|job|posting|vacancy)\\s+(?:for\\s+)?(?:a\\s+|an\\s+)?(?:experienced\\s+|senior\\s+|junior\\s+)?([\\w\\s-]{0,30}?)\\s*\\b${suffix}\\b', caseSensitive: false),
+        // "i want python developer" / "iwant python developer"
+        RegExp('(?:i\\s*want|want|need|looking for|hiring|required?|seeking)\\s+(?:to\\s+)?(?:hire\\s+)?(?:a\\s+|an\\s+)?(?:experienced\\s+|senior\\s+|junior\\s+)?([\\w\\s-]{0,30}?)\\s*\\b${suffix}\\b', caseSensitive: false),
         // "need senior python developer"
         RegExp('(?:need|looking for|hiring|required?|want|seeking)\\s+(?:a\\s+|an\\s+)?(?:experienced\\s+|senior\\s+|junior\\s+)?([\\w\\s-]{0,30}?)\\s*\\b${suffix}\\b', caseSensitive: false),
         // "senior python developer needed"
